@@ -1,0 +1,73 @@
+steps:
+  - retriever:
+      name: embedding
+      model_name: intfloat/multilingual-e5-large
+      top_k: 50
+      cache: ./cache/multilingual-e5-large
+      use_post: True
+      dataset:
+        name: multiclaim
+        crosslingual: False
+        fact_check_language: None
+        language: None
+        post_language: None
+        split: None
+        version: original
+  - dataset:
+        name: web
+  - prompt: # relevant claim selection
+      type: prompt
+      template: |
+          Input claim: {post_text}
+          ---------------------------------------
+          {retrieved_part}
+          ---------------------------------------
+          Identify only fact-checked claims that are implied by the input claim. For each claim, provide the claim ID, the fact-checked claim, and an explanation of fact-checked claim's implication to the input claim.
+          
+          Output Format (JSON):
+          {{
+              "fact_checked_claims": [
+                  {{
+                      "claim_id": "<ClaimID1>",
+                      "fact_checked_claim": "<Claim1>",
+                      "explanation": "<Explanation of Claim1>"
+                  }},
+                  {{
+                      "claim_id": "<ClaimID2>",
+                      "fact_checked_claim": "<Claim2>",
+                      "explanation": "<Explanation of Claim2>"
+                  }}
+              ]
+          }}
+  - prompt: # article summary
+      type: pointwise
+      template: 'Article: {document}\n\nCreate a 3-5 sentence summary of the article, focusing on the main idea. Provide only the summary in English without any additional text.\nSummary:'
+  - llm:
+      model: hf_model
+      model_name: Qwen/Qwen2.5-0.5B-Instruct
+      max_new_tokens: 1024
+      device_map: auto
+      load_in_4bit: False
+      system_prompt: "Provide the summary in English."
+  - prompt: # overall summary
+      type: prompt
+      template: '{summaries}\n\nGenerate a brief, one-paragraph summary that captures the key information from all the relevant claims and fact-checks. Ensure the summary covers the main points of each claim and addresses all the topics presented, while remaining concise and comprehensive.'
+  - prompt: # explanation
+      type: prompt
+      template: |
+          Input Claim: {post_text}
+          ---
+          {retrieved_part}
+          ---
+          Based only on the provided fact-checked information that is directly relevant to the input claim, determine the veracity of the claim. 
+          Ignore fact-checks that do not apply. The veracity should be classified as one of the following:
+              - "True" if the claim is accurate based on the relevant fact-checked information.
+              - "False" if the claim is inaccurate based on the relevant fact-checked information.
+              - "Unverifiable" if there is insufficient or no relevant fact-checked information to assess the claim.
+          Provide a concise explanation that justifies your prediction.
+          ---
+          Output Format (JSON):
+          {{
+              "veracity": "<True/False/Unverifiable>",
+              "explanation": "<Explanation for the prediction>"
+          }}

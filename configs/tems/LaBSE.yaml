@@ -1,0 +1,17 @@
+steps:
+  - retriever:
+      name: faiss
+      model_name: LaBSE
+      top_k: 100
+      cache: ./cache/LaBSE
+      use_post: True
+      dataset:
+        name: multiclaim
+        crosslingual: False
+        fact_check_language: None
+        language: None
+        post_language: None
+        split: None
+        version: original
+  - postprocessor:
+      name: retriever_postprocess

@@ -172,3 +172,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+/datasets/**/*.csv
+!/datasets/multiclaim/sampled_posts_annotated.csv
+
+results/*
+cache/*
+!cache/.gitkeep
+
+faiss/*
