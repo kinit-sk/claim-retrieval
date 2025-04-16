@@ -16,7 +16,7 @@ def dataset_factory(name, **kwargs) -> Dataset:
     """
     dataset = {
         'multiclaim': MultiClaimDataset,
-        'multiclaim_metdata': MultiClaimMetadataDataset,
+        'multiclaim_metadata': MultiClaimMetadataDataset,
         'web': WebReader,
         'retrieved_documents': RetrievedDocuments,
     }[name](**kwargs)

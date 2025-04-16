@@ -53,6 +53,7 @@ class MultiClaimDataset(Dataset):
         post_language: Optional[Language] = None,
         split: Optional[str] = None,
         version: str = 'original',
+        all_posts: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -68,6 +69,7 @@ class MultiClaimDataset(Dataset):
         self.post_language = post_language
         self.split = split
         self.version = version
+        self.all_posts = all_posts
 
     @classmethod
     def maybe_load_csvs(cls):
@@ -198,10 +200,10 @@ class MultiClaimDataset(Dataset):
             logger.info(f'Crosslingual mappings remaining: {len(fact_check_post_mapping)}')  # nopep8
 
         # Filtering posts if any crosslingual or language filter were applied
-        remaining_post_ids = set(
-            post_id for _, post_id in fact_check_post_mapping)
-        df_posts = df_posts[df_posts.index.isin(remaining_post_ids)]
-        logger.info(f'Filtering posts.')
+        if not self.all_posts:
+            remaining_post_ids = set(post_id for _, post_id in fact_check_post_mapping)
+            df_posts = df_posts[df_posts.index.isin(remaining_post_ids)]
+            logger.info(f'Filtering posts.')
         logger.info(f'Posts remaining: {len(df_posts)}')
 
         # Create object attributes

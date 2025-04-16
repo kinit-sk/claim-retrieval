@@ -4,6 +4,7 @@ from nltk.tokenize import sent_tokenize
 import torch
 from torch_scatter import scatter
 import nltk
+from tqdm import tqdm
 
 from src.datasets.cleaning import replace_stops, replace_whitespaces
 from src.retrievers.retriever import Retriever
@@ -86,6 +87,7 @@ class Embedding(Retriever):
             device: str = 'cpu',
             save_if_missing: bool = False,
             dataset: Any = None,
+            use_post: bool = False,
             **kwargs: Any
     ):
         super().__init__(name, top_k, dataset=dataset)
@@ -101,6 +103,7 @@ class Embedding(Retriever):
         self.device = device
         self.save_if_missing = save_if_missing
         self.document_embeddings = None
+        self.use_post = use_post
 
     def calculate_embeddings(self):
         # logger.info('Calculating embeddings for fact checks')
@@ -122,14 +125,20 @@ class Embedding(Retriever):
         self.dataset = dataset
         self.calculate_embeddings()
 
-    def retrieve(self, query: str) -> Any:
+    def retrieve(self, query: dict, post_split_size: int = 32) -> Any:
         if self.document_embeddings is None:
             self.calculate_embeddings()
+            
+        queries = []
+        if self.use_post:
+            queries = query['input']
+        else:
+            queries = query['prompt']
 
         if self.sliding_window:
             logger.info('Splitting query into windows.')
             window = slice_text(
-                query,
+                queries,
                 self.sliding_window_type,
                 self.sliding_window_size,
                 self.sliding_window_stride
@@ -154,16 +163,18 @@ class Embedding(Retriever):
         else:
             # logger.info('Calculating embeddings for query')
             query_embeddings = self.vectorizer_query.vectorize(
-                [query],
+                queries,
                 save_if_missing=self.save_if_missing,
                 normalize=True
             )
             delimiters = [(0, 1)]
 
-        results = []
-
+        top_k_results = []
+        top_k_sims_results = []
+        top_k_texts = []
         # logger.info('Calculating similarity for data splits')
-        for start_id, end_id in delimiters:
+        for start_id in tqdm(range(0, len(queries), post_split_size)):
+            end_id = start_id + post_split_size
 
             sims = torch.mm(
                 query_embeddings[start_id:end_id].to(
@@ -171,28 +182,44 @@ class Embedding(Retriever):
                 self.document_embeddings
             )
 
-            if self.sliding_window:
-                segments = segment_array[start_id:end_id]
-                segments -= int(segments[0])
-
-                sims = scatter(
-                    src=sims,
-                    index=segments,
-                    dim=0,
-                    reduce=self.sliding_window_pooling,
-                )
-
             sorted_ids = torch.argsort(sims, descending=True, dim=1)
+            sorted_similarities = torch.sort(sims, descending=True, dim=1).values
             if self.top_k is None:
-                top_k = sorted_ids[0, :].tolist()
+                top_k = sorted_ids[:, :].tolist()
+                top_k_sims = sims[:, top_k].tolist()
             else:
-                top_k = sorted_ids[0, :self.top_k].tolist()
-            top_k = self.dataset.map_topK(top_k)
-
-            results.append([
-                self.dataset.get_document(int(fc_id))
-                for fc_id in top_k
+                if isinstance(self.top_k, float):
+                    top_k = []
+                    top_k_sims = []
+                    for row_sorted_ids, row_sorted_sims in zip(sorted_ids, sorted_similarities):
+                        mask = row_sorted_sims > self.top_k
+                        top_k.append(row_sorted_ids[mask].tolist())
+                        top_k_sims.append(row_sorted_sims[mask].tolist())
+                else:
+                    top_k = sorted_ids[:, :self.top_k].tolist()
+                    top_k_sims = sims[:, top_k].tolist()
+            
+            top_k = [
+                self.dataset.map_topK(row)
+                for row in top_k
+            ]        
+            
+            top_k_texts.extend([
+                [
+                    self.dataset.get_document(int(fc_id))
+                    for fc_id in row
+                ]
+                for row in top_k
+            ])
+            top_k_results.extend(top_k)
+            top_k_sims_results.extend([
+                [
+                    sim for sim in row
+                ]
+                for row in top_k_sims
             ])
 
-        results = [item for sublist in results for item in sublist]
-        return results, top_k
+        if len(queries) > 1:
+            return top_k_texts, top_k_results
+        else:
+            return top_k_texts[0], top_k_results[0]

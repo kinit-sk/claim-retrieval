@@ -53,6 +53,7 @@ class Dataset:
     entity: str = None
     date_range: tuple = None
     use_metadata: bool = False
+    all_posts: bool = False
 
 
 @dataclass

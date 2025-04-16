@@ -23,4 +23,4 @@ steps:
       dataset:
         name: retrieved_documents
   - postprocessor:
-      name: retriever_postprocessor
+      name: retriever_postprocess

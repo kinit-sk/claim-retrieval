@@ -36,7 +36,7 @@ def predicted_ranks(predicted_ids: np.array, desired_ids: np.array, default_rank
     return predicted_ranks
 
 
-def process_results(gen: Generator, default_rank: int = None, csv_path: str = None):
+def process_results(gen: Generator, default_rank: int = None, csv_path: str = None, all_posts: bool = False):
     """
     Take the results generated from `gen` and process them. By default, only calculate metrics, but dumping the results into a csv file is also supported via `csv_path` attribute. For `default_rank` see `predicted_ranks` function.
     """
@@ -57,8 +57,9 @@ def process_results(gen: Generator, default_rank: int = None, csv_path: str = No
         pd.DataFrame(rows, columns=['post_id', 'desired_fact_check_ranks',
                      'predicted_fact_check_ids']).to_csv(csv_path, index=False)
 
+    if all_posts:
+        return ranks
     return standard_metrics(ranks)
-    # return ranks
 
 
 def evaluate_post_fact_check_pairs(gen, dataset):

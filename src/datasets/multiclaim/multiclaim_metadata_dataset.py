@@ -304,7 +304,7 @@ Fact-checking organization: {organization}"""
             for fact_check_id, claim, language, date, org in zip(df_fact_checks.index, df_fact_checks['claim'], df_fact_checks['language'], df_fact_checks['published_at'], df_fact_checks['domain'])
         }
 
-        self.id_to_fact_check = {
+        self.id_to_documents = {
             fact_check_id: self.format_fact_check(claim, language, date, org)
             for fact_check_id, claim, language, date, org in zip(df_fact_checks.index, df_fact_checks['claim'], df_fact_checks['language'], df_fact_checks['published_at'], df_fact_checks['domain'])
         }
