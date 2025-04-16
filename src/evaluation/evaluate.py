@@ -8,7 +8,6 @@ from tqdm import tqdm
 import os
 
 from src.evaluation.metrics import standard_metrics
-from src.evaluation.utils import find_fact_check_ids
 
 
 logging.basicConfig(level=logging.INFO)
