@@ -174,7 +174,7 @@ cython_debug/
 .pypirc
 
 /datasets/**/*.csv
-!/datasets/multiclaim/sampled_posts_annotated.csv
+!/datasets/multiclaim/sampled_posts.csv
 
 results/*
 cache/*

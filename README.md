@@ -92,6 +92,18 @@ To experiments with various LLM, it is necessary to update the `model_name` fiel
 You can evaluate the full pipeline using the included Jupyter notebook:
 - `Pipeline evaluation.ipynb`
 
+#### Retrieval Classification Baseline
+
+For comparison, we provide a retrieval classification baseline.
+
+First run code in `Retrieval baseline.ipynb` to prepare data for the baseline experiments.
+
+Then, run the code fo retreival baseline using the following command:
+
+```bash
+python -m scripts.retrieval_classification
+```
+
 #### Veracity Classification Baseline
 
 For comparison, we provide a simple veracity classification baseline:
