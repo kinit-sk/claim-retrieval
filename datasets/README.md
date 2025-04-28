@@ -6,7 +6,7 @@ See more information in [multiclaim/README.md](multiclaim/README.md).
 
 ## AFP-Sum dataset
 
-Download data from [Zenodo](), especially the following:
+Download data from [Zenodo](https://zenodo.org/records/15267292), especially the following:
 
 - `afp-sum.csv` - the entire dataset scrapped from the AFP organization
 - `sample2.csv` - 2 fact-checking articles per languages for prompt engineering experiments

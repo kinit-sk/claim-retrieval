@@ -9,7 +9,7 @@ It is necessary to download all the files included in the desired directory. The
 
 ### Fact-checks metadata
 
-To download fact-checks metadata you need to download from [Zenodo]() the following file:
+To download fact-checks metadata you need to download from [Zenodo](https://zenodo.org/records/15267292) the following file:
  - `fact_checks_metadata.csv`
 
 ### Paper citing
