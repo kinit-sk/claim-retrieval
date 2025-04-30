@@ -1,19 +1,9 @@
 # A Generative-AI-Driven Claim Retrieval System Capable of Detecting and Retrieving Claims from Social Media Platforms in Multiple Languages
+
 This repository contains the official codebase for our paper: "A Generative-AI-Driven Claim Retrieval System Capable of Detecting and Retrieving Claims from Social Media Platforms in Multiple Languages"
 
 The system is designed to support fact-checkers by retrieving relevant previously fact-checked claims for a given input, filtering out irrelevant content, and generating human-readable summaries and explanations using large language models (LLMs). This tool aims to streamline the fact-checking workflow and reduce the verification effort across multiple languages.
 
-
-<!-- Important files:
- - `Prepare multiclaim.ipynb`
-
-
-Files that could be found on [Zenodo]():
-- `afp-sum.csv`
-- `sample2.csv`
-- `sample100.csv`
-- `multiclaim/sampled_posts.csv`
-- `fact_checks_metadata.csv` -->
 
 ## Abstract
 
@@ -118,5 +108,13 @@ python -m scripts.veracity_baseline
 If you use the code or information from this repository, please cite our paper, which is available on arXiv.
 
 ```bibtex
+@misc{vykopal2025generativeaidrivenclaimretrievalcapable,
+      title={A Generative-AI-Driven Claim Retrieval System Capable of Detecting and Retrieving Claims from Social Media Platforms in Multiple Languages}, 
+      author={Ivan Vykopal and Martin Hyben and Robert Moro and Michal Gregor and Jakub Simko},
+      year={2025},
+      eprint={2504.20668},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2504.20668}, 
+}
 ```
-
